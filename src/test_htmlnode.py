@@ -1,5 +1,4 @@
 import unittest
-
 from htmlnode import HTMLNode
 
 class TestHTMLNode(unittest.TestCase):
@@ -21,8 +20,10 @@ class TestHTMLNode(unittest.TestCase):
             "target": "_blank",
         }
 
-        node1 = HTMLNode("h1", "val", HTMLNode(), prop_dict)
-        node2 = HTMLNode("h1", "val", HTMLNode(), prop_dict)
+        node_children = [HTMLNode(tag="p"), HTMLNode(tag="p")]
+       
+        node1 = HTMLNode("h1", "val", node_children, prop_dict)
+        node2 = HTMLNode("h1", "val", node_children, prop_dict)
 
         self.assertEqual(node1, node2)
 
@@ -40,15 +41,19 @@ class TestHTMLNode(unittest.TestCase):
 
         self.assertNotEqual(node1, node2)
 
-    def test_child_not_eq(self):
 
-        child1 = HTMLNode()
-        child2 = HTMLNode()
+    def test_children_not_eq(self):
 
-        node1 = HTMLNode(children=child1)
-        node2 = HTMLNode(children=child2)
+        child1= HTMLNode(tag="p")
+        child2 = HTMLNode(tag="p")
 
-        self.assertNotEqual(node1, node2)
+        child3= HTMLNode(tag="p")
+        child4 = HTMLNode(tag="p")
+
+        node1 = HTMLNode(children=[child1, child2])
+        node2 = HTMLNode(children=[child3, child4])
+
+        self.assertIsNot(node1, node2)
 
     def test_val_not_eq(self):
 

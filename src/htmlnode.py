@@ -32,7 +32,7 @@ class HTMLNode():
 
         if self.value != other_node.value:
             return False
-        
+
         if self.children != other_node.children:
             return False
 
@@ -41,10 +41,10 @@ class HTMLNode():
 
         return True
     
-    def __ne__(self, other_node):
-
-        if 
+    
 
     def __repr__(self):
 
         formatted_string = f"HTMLNode(tag={self.tag}, value={self.value}, children={self.children}, props={self.props})"
+
+        return formatted_string
