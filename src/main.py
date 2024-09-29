@@ -1,11 +1,13 @@
 from textnode import TextNode
+from htmlnode import HTMLNode
+from leafnode import LeafNode
+from parentnode import ParentNode
 
 def main():
 
-    new_node = TextNode("This is a text node", "bold", "https://www.boot.dev")
+    
 
-    print(new_node)
-
+    print("")
 
 
 

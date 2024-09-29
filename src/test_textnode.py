@@ -1,5 +1,6 @@
 import unittest
 from textnode import TextNode
+from leafnode import LeafNode
 
 class TestTextNode(unittest.TestCase):
 
@@ -27,6 +28,60 @@ class TestTextNode(unittest.TestCase):
         node1 = TextNode("This is a text node", "bold")
         node2 = TextNode("This is a text node", "italics")
         self.assertNotEqual(node1, node2)
+
+    def test_text_to_html(self):
+
+        text_node = TextNode("Test", "text")
+        leaf_node = text_node.text_node_to_html_node()
+
+        test_node = LeafNode(value="Test")
+
+        self.assertEqual(leaf_node, test_node)
+
+    def test_bold_to_html(self):
+
+        text_node = TextNode("Test", "bold")
+        leaf_node = text_node.text_node_to_html_node()
+
+        test_node = LeafNode("b", "Test")
+
+        self.assertEqual(leaf_node, test_node)
+
+    def test_italic_to_html(self):
+
+        text_node = TextNode("Test", "italic")
+        leaf_node = text_node.text_node_to_html_node()
+
+        test_node = LeafNode("i", "Test")
+
+        self.assertEqual(leaf_node, test_node)
+
+    def test_code_to_html(self):
+
+        text_node = TextNode("Test", "code")
+        leaf_node = text_node.text_node_to_html_node()
+
+        test_node = LeafNode("code", "Test")
+
+        self.assertEqual(leaf_node, test_node)
+
+    def test_link_to_html(self):
+
+        text_node = TextNode("Test", "link", "www.google.com")
+        leaf_node = text_node.text_node_to_html_node()
+
+        test_node = LeafNode("a", "Test", {"href": "www.google.com"})
+
+        self.assertEqual(leaf_node, test_node)
+
+    def test_image_to_html(self):
+
+        text_node = TextNode("Test", "image", "/assets/image.png")
+        leaf_node = text_node.text_node_to_html_node()
+
+        test_node = LeafNode("img", "", {"href": "/assets/image.png", "alt": "Test"})
+
+        self.assertEqual(leaf_node, test_node)
 
 if __name__ == "__main__":
     unittest.main()
