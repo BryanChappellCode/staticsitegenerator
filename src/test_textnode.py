@@ -83,5 +83,15 @@ class TestTextNode(unittest.TestCase):
 
         self.assertEqual(leaf_node, test_node)
 
+    def test_invalid_type(self):
+
+        text_node = TextNode("h1", "Header")
+        
+        with self.assertRaises(ValueError) as error:
+            
+            text_node.text_node_to_html_node()
+            self.assertTrue("Invalid text node type", error.exception)
+            
+
 if __name__ == "__main__":
     unittest.main()

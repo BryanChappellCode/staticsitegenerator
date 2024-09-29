@@ -39,7 +39,7 @@ class TextNode:
             case _:
                 raise ValueError("Invalid text node type")
     
-    
+
     def __repr__(self):
 
         formated_str = f"TextNode({self.text}, {self.text_type}, {self.url})"
