@@ -34,7 +34,7 @@ class TextNode:
 
     def __repr__(self):
 
-        formated_str = f"TextNode({self.text}, {self.text_type}, {self.url})"
+        if self.url == None: return  f"TextNode({self.text}, {self.text_type})"
+        else: return f"TextNode({self.text}, {self.text_type}, {self.url})"
 
-        return formated_str
     

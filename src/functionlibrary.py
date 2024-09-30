@@ -2,6 +2,7 @@ from textnode import TextNode
 from leafnode import LeafNode
 from parentnode import ParentNode
 from constants import *
+import re
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
 
@@ -30,6 +31,7 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             if oscillator == text_type_text: oscillator = text_type
             else: oscillator = text_type_text
 
+        # trim empty tags from ends
         if node_list[0].text == "": 
             del node_list[0]   
                 
@@ -39,4 +41,139 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
         new_node_list.extend(node_list)
 
 
+    return new_node_list
+
+def extract_markdown_images(text):
+
+    alt_text = re.findall("(?:[!]{1}\[(.*?)\]\(.*?\))" , text)
+    links = re.findall("(?:[!]{1}\[.*?\]\((.*?)\))" , text)
+
+    if len(alt_text) != len(links):
+        raise Exception("Invalid syntax for markdown image")
+
+    image_list = []
+
+    for i in range(0, len(alt_text)):
+
+        valid_syntax = f"![{alt_text[i]}]({links[i]})"
+    
+        if valid_syntax not in text:
+            raise Exception("Invalid syntax for markdown image")
+        
+        image_list.append((alt_text[i], links[i]))
+
+    return image_list
+
+def extract_markdown_links(text):
+    
+    anchor_text = re.findall("(?:[^!]\[(.*?)\]\(.*?\))" , text)
+    links = re.findall("(?:[^!]\[.*?\]\((.*?)\))" , text)
+
+    pass
+    if len(anchor_text) != len(links):
+        raise Exception("Invalid syntax for markdown link: Unpaired anchor text/link")
+
+    link_list = []
+
+    for i in range(0, len(anchor_text)):
+
+        valid_syntax = f"[{anchor_text[i]}]({links[i]})"
+    
+        if valid_syntax not in text:
+            raise Exception("Invalid syntax for markdown link: Anchor text must be joined with link")
+        
+        link_list.append((anchor_text[i], links[i]))
+
+    return link_list
+
+def split_nodes_image(old_nodes):
+
+    new_node_list = []
+
+    for node in old_nodes:
+
+        if node.text_type != text_type_text:
+            new_node_list.append(node)
+            continue
+
+        node_list = []
+        image_list = extract_markdown_images(node.text)
+        delimited_text = re.sub("([!]\[.*?\]\(.*?\))", "*", node.text)
+        split_text = delimited_text.split("*")
+        
+        # Since the image markdown is used as a delimiter, there will always be one less object in the image list than the text list
+        if len(split_text) - 1 != len(image_list):
+            raise Exception("Invalid markdown syntax")
+
+        # Since every other node will be text, oscillate between a text node and an image node
+        oscillator = text_type_text
+        j = 0
+        k = 0
+
+        # Loop for the sum of objects of both lists. Add text, then image. Text, then image. And so on...
+        for i in range(0, len(split_text) + len(image_list)):
+
+            if oscillator == text_type_text:
+                node_list.append(TextNode(split_text[j], text_type_text))
+                oscillator = text_type_image
+                j += 1
+            else:
+                alt_text = image_list[k][0]
+                url = image_list[k][1]
+                node_list.append(TextNode(alt_text, text_type_image, url))
+                oscillator = text_type_text
+                k += 1
+        
+        # trim empty nodes
+        if node_list[0].text == "": del node_list[0]
+        if node_list[-1].text == "": del node_list[-1]
+
+        new_node_list.extend(node_list)
+    
+    return new_node_list
+        
+def split_nodes_link(old_nodes):
+
+    new_node_list = []
+
+    for node in old_nodes:
+
+        if node.text_type != text_type_text:
+            new_node_list.append(node)
+            continue
+
+        node_list = []
+        link_list = extract_markdown_links(node.text)
+        delimited_text = re.sub("(?<=[^!])(\[.*?\]\(.*?\))", "*", node.text)
+        split_text = delimited_text.split("*")
+
+        # Since the link markdown is used as a delimiter, there will always be one less object in the link list than the text list
+        if len(split_text) - 1 != len(link_list):
+            raise Exception("Invalid markdown syntax")
+
+        # Since every other node will be text, oscillate between a text node and an image node
+        oscillator = text_type_text
+        j = 0
+        k = 0
+
+        # Loop for the sum of objects of both lists. Add text, then image. Text, then image. And so on...
+        for i in range(0, len(split_text) + len(link_list)):
+
+            if oscillator == text_type_text:
+                node_list.append(TextNode(split_text[j], text_type_text))
+                oscillator = text_type_link
+                j += 1
+            else:
+                anchor_text = link_list[k][0]
+                url = link_list[k][1]
+                node_list.append(TextNode(anchor_text, text_type_link, url))
+                oscillator = text_type_text
+                k += 1
+        
+        # trim empty nodes
+        if node_list[0].text == "": del node_list[0]
+        if node_list[-1].text == "": del node_list[-1]
+
+        new_node_list.extend(node_list)
+    
     return new_node_list

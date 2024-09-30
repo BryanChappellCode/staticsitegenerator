@@ -97,3 +97,158 @@ class TestFunctionLibrary(unittest.TestCase):
         test_list = [TextNode("Sentence ", text_type_text), TextNode("One", text_type_bold), TextNode("Sentence ", text_type_text), TextNode("Two", text_type_bold)]
         
         self.assertEqual(new_nodes, test_list)
+
+    def test_extract_markdown_images(self):
+
+        markdown_string = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
+        
+        test_list = [("rick roll", "https://i.imgur.com/aKaOqIh.gif"), ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg")]
+
+        image_list = functions.extract_markdown_images(markdown_string)
+
+        self.assertEqual(image_list, test_list)
+   
+    def test_extract_markdown_image_more_alt_text(self):
+
+        markdown_string = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan]"
+
+        with self.assertRaises(Exception) as error:
+
+            image_list = functions.extract_markdown_images(markdown_string)
+
+            self.assertTrue("Invalid syntax for markdown image", error.exception)
+
+    def test_extract_markdown_image_more_links(self):
+
+        markdown_string = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and (https://i.imgur.com/fJRm4Vk.jpeg)"
+
+        with self.assertRaises(Exception) as error:
+
+            image_list = functions.extract_markdown_images(markdown_string)
+
+            self.assertTrue("Invalid syntax for markdown image", error.exception)
+
+    def test_extract_markdown_image_space_between(self):
+
+        markdown_string = "This is text with a ![rick roll] (https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
+
+        with self.assertRaises(Exception) as error:
+
+            image_list = functions.extract_markdown_images(markdown_string)
+
+            self.assertTrue("Invalid syntax for markdown image", error.exception)
+
+    def test_extract_markdown_links(self):
+        
+        text = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+
+        test_list =  [("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")]
+
+        link_list = functions.extract_markdown_links(text)
+
+        self.assertEqual(link_list, test_list)
+
+    def test_extract_markdown_link_more_anchor_text(self):
+
+        markdown_string = "This is text with a [rick roll](https://i.imgur.com/aKaOqIh.gif) and [obi wan]"
+
+        with self.assertRaises(Exception) as error:
+
+            image_list = functions.extract_markdown_links(markdown_string)
+
+            self.assertTrue("Invalid syntax for markdown link", error.exception)
+
+    def test_extract_markdown_links_more_links(self):
+
+        markdown_string = "This is text with a [rick roll](https://i.imgur.com/aKaOqIh.gif) and (https://i.imgur.com/fJRm4Vk.jpeg)"
+
+        with self.assertRaises(Exception) as error:
+
+            image_list = functions.extract_markdown_links(markdown_string)
+
+            self.assertTrue("Invalid syntax for markdown link", error.exception)
+
+    def test_extract_markdown_link_space_between(self):
+
+        markdown_string = "This is text with a [rick roll] (https://i.imgur.com/aKaOqIh.gif) and [obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
+
+        with self.assertRaises(Exception) as error:
+
+            image_list = functions.extract_markdown_links(markdown_string)
+
+            self.assertTrue("Invalid syntax for markdown link", error.exception)
+
+    def test_split_nodes_image(self):
+
+        markdown_string = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
+
+        node = TextNode(markdown_string, text_type_text)
+
+        node_list = functions.split_nodes_image([node])
+
+        test_list = [TextNode("This is text with a ", text_type_text), TextNode("rick roll", text_type_image, "https://i.imgur.com/aKaOqIh.gif"), TextNode(" and ", text_type_text), TextNode("obi wan", text_type_image, "https://i.imgur.com/fJRm4Vk.jpeg")]
+
+        self.assertEqual(node_list, test_list)
+
+    def test_split_nodes_link(self):
+
+        markdown_string = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+
+        node = TextNode(markdown_string, text_type_text)
+
+        node_list = functions.split_nodes_link([node])
+
+        test_list = [TextNode("This is text with a link ", text_type_text), 
+                     TextNode("to boot dev", text_type_link, "https://www.boot.dev"),
+                    TextNode(" and ", text_type_text),
+                    TextNode("to youtube", text_type_link, "https://www.youtube.com/@bootdotdev") ]
+
+        self.assertEqual(node_list, test_list)
+
+    def test_split_nodes_link_exclamation(self):
+
+        markdown_string = "This is text with a link ![to boot dev](https://www.boot.dev) and ![to youtube](https://www.youtube.com/@bootdotdev)"
+
+        node = TextNode(markdown_string, text_type_text)
+
+        node_list = functions.split_nodes_link([node])
+
+        test_list = [TextNode(markdown_string, text_type_text)]
+
+        self.assertEqual(node_list, test_list)
+
+    def test_split_nodes_embedded(self):
+
+        markdown_string = "This is text with a link [to boot dev](https://www.boot.dev) and ![rick roll](https://i.imgur.com/aKaOqIh.gif)"
+
+        node = TextNode(markdown_string, text_type_text)
+
+        node_list = functions.split_nodes_image([node])
+        embedded_node_list = functions.split_nodes_link(node_list)
+
+        test_list = [
+            TextNode("This is text with a link ", text_type_text),
+            TextNode("to boot dev", text_type_link, "https://www.boot.dev"),
+            TextNode(" and ", text_type_text),
+            TextNode("rick roll", text_type_image, "https://i.imgur.com/aKaOqIh.gif")
+        ]
+
+        self.assertEqual(embedded_node_list, test_list)
+
+    def test_split_nodes_embedded_reverse(self):
+
+        markdown_string = "This is text with a link [to boot dev](https://www.boot.dev) and ![rick roll](https://i.imgur.com/aKaOqIh.gif)"
+
+        node = TextNode(markdown_string, text_type_text)
+
+        node_list = functions.split_nodes_link([node])
+        embedded_node_list = functions.split_nodes_image(node_list)
+
+        test_list = [
+            TextNode("This is text with a link ", text_type_text),
+            TextNode("to boot dev", text_type_link, "https://www.boot.dev"),
+            TextNode(" and ", text_type_text),
+            TextNode("rick roll", text_type_image, "https://i.imgur.com/aKaOqIh.gif")
+        ]
+
+        self.assertEqual(embedded_node_list, test_list)
