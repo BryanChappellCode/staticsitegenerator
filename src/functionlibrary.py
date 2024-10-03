@@ -4,7 +4,20 @@ from parentnode import ParentNode
 from constants import *
 import re
 
+def text_node_to_html_node(text_node):
+
+        if text_node.text_type == text_type_text: return LeafNode(value=text_node.text)
+        if text_node.text_type == text_type_bold: return LeafNode("b", text_node.text)
+        if text_node.text_type == text_type_italic: return LeafNode("i", text_node.text)
+        if text_node.text_type == text_type_code: return LeafNode("code", text_node.text)
+        if text_node.text_type == text_type_link: return LeafNode("a", text_node.text, {"href": text_node.url})
+        if text_node.text_type == text_type_image: return LeafNode("img", "", {"href": text_node.url, "alt": text_node.text})
+
+        raise ValueError("Invalid text node type")
+
+
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
+
 
     new_node_list = []
 
@@ -20,10 +33,16 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 
     for node in old_nodes:
 
+        node_list = []
+
+        if node.text_type != text_type_text:
+    
+            new_node_list.append(node)
+            continue
+
         split_text = node.text.split(delimiter)
         if len(split_text) % 2 == 0: raise Exception("Unclosed delimiter")
 
-        node_list = []
         oscillator = text_type_text
 
         for text in split_text:
@@ -177,3 +196,35 @@ def split_nodes_link(old_nodes):
         new_node_list.extend(node_list)
     
     return new_node_list
+
+def text_to_textnodes(text):
+
+    text_list = [TextNode(text, text_type_text)]
+
+    bold_list = split_nodes_delimiter(text_list, "**", text_type_bold)
+    italic_list = split_nodes_delimiter(bold_list, "*", text_type_italic)
+    code_list = split_nodes_delimiter(italic_list, "`", text_type_code)
+    image_list = split_nodes_image(code_list)
+    link_list = split_nodes_link(image_list)
+
+    return link_list
+
+def markdown_to_blocks(markdown):
+
+    split_markdown = markdown.split("\n\n")
+
+    block_list = []
+
+    for block in split_markdown:
+        block_list.append(block.strip())
+
+    return block_list
+
+def block_to_block_type(block):
+
+    
+    
+
+
+
+

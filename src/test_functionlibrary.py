@@ -252,3 +252,81 @@ class TestFunctionLibrary(unittest.TestCase):
         ]
 
         self.assertEqual(embedded_node_list, test_list)
+
+
+    def test_text_to_textnodes(self):
+
+        text = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+
+        node_list = functions.text_to_textnodes(text)
+        
+        test_list = [
+            TextNode("This is ", text_type_text),
+            TextNode("text", text_type_bold),
+            TextNode(" with an ", text_type_text),
+            TextNode("italic", text_type_italic),
+            TextNode(" word and a ", text_type_text),
+            TextNode("code block", text_type_code),
+            TextNode(" and an ", text_type_text),
+            TextNode("obi wan image", text_type_image, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", text_type_text),
+            TextNode("link", text_type_link, "https://boot.dev")
+        ]
+
+        self.assertEqual(node_list, test_list)
+
+    def test_text_to_textnodes_error(self):
+
+        text = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+
+        node_list = functions.text_to_textnodes(text)
+        
+        test_list = [
+            TextNode("This is", text_type_text),
+            TextNode("text", text_type_bold),
+            TextNode("with an", text_type_text),
+            TextNode("italic", text_type_italic),
+            TextNode("word and a", text_type_text),
+            TextNode("code block", text_type_code),
+            TextNode("and an", text_type_text),
+            TextNode("obi wan image", text_type_image, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode("and a", text_type_text),
+            TextNode("link", text_type_link, "https://boot.dev")
+        ]
+
+        self.assertNotEqual(node_list, test_list)
+
+    def test_markdown_to_blocks(self):
+
+        markdown = "# This is a heading\n\nThis is a paragraph of text. It has some **bold** and *italic* words inside of it.\n"
+        markdown += "\n* This is the first list item in a list block\n* This is a list item\n* This is another list item"
+
+        markdown_blocks = functions.markdown_to_blocks(markdown)
+
+        test_list = ["# This is a heading", 
+                     "This is a paragraph of text. It has some **bold** and *italic* words inside of it.",
+                     "* This is the first list item in a list block\n* This is a list item\n* This is another list item"]
+        
+        self.assertEqual(markdown_blocks, test_list)
+
+    def test_markdown_to_blocks_error(self):
+
+        markdown = "# This is a heading\nThis is a paragraph of text. It has some **bold** and *italic* words inside of it.\n"
+        markdown += "* This is the first list item in a list block\n* This is a list item\n* This is another list item"
+
+        markdown_blocks = functions.markdown_to_blocks(markdown)
+
+        test_list = ["# This is a heading", 
+                     "This is a paragraph of text. It has some **bold** and *italic* words inside of it.",
+                     "* This is the first list item in a list block\n* This is a list item\n* This is another list item"]
+        
+        self.assertNotEqual(markdown_blocks, test_list)
+
+    def test_block_to_block_type_heading(self):
+
+        block_list = ["# This is a heading", 
+                     "This is a paragraph of text. It has some **bold** and *italic* words inside of it.",
+                     "* This is the first list item in a list block\n* This is a list item\n* This is another list item"]
+        
+        for block in block_list:
+            print(functions.block_to_block_type(block))
