@@ -322,11 +322,170 @@ class TestFunctionLibrary(unittest.TestCase):
         
         self.assertNotEqual(markdown_blocks, test_list)
 
-    def test_block_to_block_type_heading(self):
+    def test_block_to_block_type(self):
 
         block_list = ["# This is a heading", 
                      "This is a paragraph of text. It has some **bold** and *italic* words inside of it.",
-                     "* This is the first list item in a list block\n* This is a list item\n* This is another list item"]
+                     "``` This is a code block ```",
+                     ">This is a quote\n> This is also a quote",
+                     "* This is the first list item in a list block\n* This is a list item\n* This is another list item",
+                     "1. First line\n2. Second line\n3. Third Line"]
         
+        block_types = []
+
         for block in block_list:
-            print(functions.block_to_block_type(block))
+            block_types.append(functions.block_to_block_type(block))
+
+        test_types = ["heading", "paragraph", "code", "quote", "unordered_list", "ordered_list"]
+
+        self.assertEqual(block_types, test_types)
+
+    def test_block_to_block_type_heading(self):
+
+        block_list = ["# This is a heading", 
+                     "## This is a heading",
+                     "### This is a heading",
+                     "#### This is a heading",
+                     "##### This is a heading",
+                     "###### This is a heading"]
+        
+        block_types = []
+
+        for block in block_list:
+            block_types.append(functions.block_to_block_type(block))
+
+        test_types = ["heading", "heading", "heading", "heading", "heading", "heading"]
+
+        self.assertEqual(block_types, test_types)   
+        
+    def test_block_to_block_type_not_heading(self):
+
+        block_list = ["#This is a heading", 
+                     "##This is a heading",
+                     "###This is a heading",
+                     "####This is a heading",
+                     "#####This is a heading",
+                     "######This is a heading",
+                     "####### This is a heading",
+                     "This is a heading"]
+        
+        block_types = []
+
+        for block in block_list:
+            block_types.append(functions.block_to_block_type(block))
+
+        test_types = ["heading", "heading", "heading", "heading", "heading", "heading", "heading", "heading"]
+
+        self.assertNotEqual(block_types, test_types)     
+
+    def test_block_to_block_type_code(self):
+
+        block_list = ["``` code block ```",
+                      "```\ncode\nblock\n```"]
+        
+        block_types = []
+
+        for block in block_list:
+            block_types.append(functions.block_to_block_type(block))
+
+        test_types = ["code", "code"]
+
+        self.assertEqual(block_types, test_types)
+
+    def test_block_to_block_type_not_code(self):
+
+        block_list = ["``` code block",
+                      "````\ncode\nblock\n````"]
+        
+        block_types = []
+
+        for block in block_list:
+            block_types.append(functions.block_to_block_type(block))
+
+        test_types = ["code", "code"]
+
+        self.assertNotEqual(block_types, test_types)
+
+    def test_block_to_block_type_quote(self):
+
+        block_list = [">This is a quote",
+                      "> This is a quote",
+                      ">This\n>is\n>a\n>quote"]
+        
+        block_types = []
+
+        for block in block_list:
+            block_types.append(functions.block_to_block_type(block))
+
+        test_types = ["quote", "quote", "quote"]
+
+        self.assertEqual(block_types, test_types)
+
+    def test_block_to_block_type_not_quote(self):
+
+        block_list = ["This is a quote",
+                      ">> This is a quote",
+                      ">This\nis\na\nquote"]
+        
+        block_types = []
+
+        for block in block_list:
+            block_types.append(functions.block_to_block_type(block))
+
+        test_types = ["quote", "quote", "quote"]
+
+        self.assertNotEqual(block_types, test_types)
+
+    def test_block_to_block_type_unordered_list(self):
+
+        block_list = ["* This is the first list item in a list block\n* This is a list item\n* This is another list item",
+                      "* list!"]
+        
+        block_types = []
+
+        for block in block_list:
+            block_types.append(functions.block_to_block_type(block))
+
+        test_types = ["unordered_list", "unordered_list"]
+
+        self.assertEqual(block_types, test_types)
+
+    def test_block_to_block_type_not_unordered_list(self):
+
+        block_list = ["* This is the first list item in a list block\n This is a list item\n This is another list item",
+                      "** list!"]
+        
+        block_types = []
+
+        for block in block_list:
+            block_types.append(functions.block_to_block_type(block))
+
+        test_types = ["unordered_list", "unordered_list"]
+
+        self.assertNotEqual(block_types, test_types)
+
+    def test_block_to_block_type_ordered_list(self):
+
+        block_list = ["1. First line\n2. Second line\n3. Third Line"]
+        
+        block_types = []
+
+        for block in block_list:
+            block_types.append(functions.block_to_block_type(block))
+
+        test_types = ["ordered_list"]
+
+        self.assertEqual(block_types, test_types)
+
+    def test_block_to_block_type_not_ordered_list(self):
+
+        block_list = ["1. First line\n3. Second line\n4. Third Line"]
+        
+        block_types = []
+
+        for block in block_list:
+            block_types.append(functions.block_to_block_type(block))
+
+        test_types = ["ordered_list"]
+
+        self.assertNotEqual(block_types, test_types)

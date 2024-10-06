@@ -222,6 +222,67 @@ def markdown_to_blocks(markdown):
 
 def block_to_block_type(block):
 
+    pattern = re.search("^[#]{1,6}[\s][a-zA-Z0-9\s]*", block)
+
+    if pattern != None:
+        return "heading"
+
+    pattern = re.search("^[`]{3}[\s\S]*[`]{3}$", block)
+
+    if pattern != None:
+        return "code"
+
+    pattern = re.search("^[>]", block)
+
+    if pattern != None:
+
+        split_pattern = block.split("\n")
+
+        for line in split_pattern:
+            line_pattern = re.search("^[>]", block)
+
+            if line_pattern == None:
+                return "paragraph"
+
+        return "quote"
+
+    pattern = re.search("^[*][\s]", block)
+
+    if pattern != None:
+
+        split_pattern = block.split("\n")
+
+        for line in split_pattern:
+            line_pattern = re.search("^[*][\s]", block)
+
+            if line_pattern == None:
+                return "paragraph"
+
+        return "unordered_list"
+
+    i = 1
+
+    pattern = re.search(f"^[{i}][.][\s]", block)
+
+    if pattern != None:
+
+        split_pattern = block.split("\n")
+
+        for line in split_pattern:
+
+            line_pattern = re.search(f"^[{i}][.][\s]", line)
+
+            if line_pattern == None:
+                return "paragraph"
+            
+            i += 1
+        
+        return "ordered_list"
+    
+    return "paragraph"
+
+    
+
     
     
 
