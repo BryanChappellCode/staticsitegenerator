@@ -281,11 +281,106 @@ def block_to_block_type(block):
     
     return "paragraph"
 
+def markdown_to_html_node(markdown):
+
+    markdown_blocks = markdown_to_blocks(markdown)
+
+    html_list = []
+
+    for block in markdown_blocks:
+        markdown_type = block_to_block_type(block)    
+        html_list.append(create_markdown_html_node(block, markdown_type))
     
+    full_html = ParentNode("div", html_list)
 
+    return full_html
+
+def create_markdown_html_node(markdown_text, markdown_type):
+
+    match markdown_type:
+        case "heading":
+            return create_heading_node(markdown_text)
+        case "code":
+            return create_code_node(markdown_text)
+        case "quote":
+            return create_quote_node(markdown_text)
+        case "ordered_list":
+            return create_ordered_list_node(markdown_text)
+        case "unordered_list":
+            return create_unordered_list_node(markdown_text)
+        case "paragraph":
+            return create_paragraph_node(markdown_text)
+        case _:
+            raise Exception(f"Invalid markdown type: {markdown_type}")
+
+def create_heading_node(heading):
     
-    
+    split_heading_block = heading.split("\n")
 
+    if len(split_heading_block) > 1:
+        raise Exception("Only one line per heading block allowed")
 
+    split_line = heading.split()
+    head_num = len(split_line[0])
+    heading_text = " ".join(split_line[1:])
 
+    heading_node = LeafNode(f"h{head_num}", text_to_textnodes(heading_text))
 
+    return heading_node
+
+def create_code_node(code):
+
+    stripped_code = code.lstrip("```\n")
+    stripped_code = stripped_code.rstrip("\n```")
+
+    pre_node = LeafNode("pre", stripped_code)
+    code_node = ParentNode("code", pre_node)
+
+    return code_node
+
+def create_quote_node(quote):
+        
+        split_quote = quote.split("> ")
+        full_quote = "".join(split_quote[1:])
+        
+        quote_node = LeafNode("blockquote", text_to_textnodes(full_quote))
+
+        return quote_node
+
+def create_unordered_list_node(un_list):
+
+    split_list = un_list.split("\n")
+
+    list_items = [] 
+
+    for line in split_list:
+        s_line = line.lstrip("* ")
+        line_node = LeafNode("li", text_to_textnodes(s_line))
+        list_items.append(line_node)
+
+    unordered_list_node = ParentNode("ul", list_items)
+
+    return unordered_list_node
+
+def create_ordered_list_node(or_list):
+
+    split_list = or_list.split("\n")
+
+    list_items = []
+
+    for i in range(0, len(split_list)):
+        j = i + 1
+
+        s_line = split_list[i].lstrip(f"{j}. ")
+        line_node = LeafNode("li", text_to_textnodes(s_line))
+        list_items.append(line_node)
+
+    ordered_list_node = ParentNode("ol", list_items)
+
+    return ordered_list_node
+
+def create_paragraph_node(paragraph):
+
+    paragraph_node = LeafNode("p", text_to_textnodes(paragraph))
+
+    return paragraph_node
